@@ -278,7 +278,7 @@ app.get('/audios', async (req: Request, res: Response): Promise<void> => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('title artist album genre playCount');
+      .select('title artist album genre playCount url cover composer');
 
     const total = await Audio.countDocuments(filter);
 

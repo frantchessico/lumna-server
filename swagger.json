@@ -17,7 +17,7 @@
       "schemas": {
         "Audio": {
           "type": "object",
-          "required": ["title", "artist", "genre", "duration"],
+          "required": ["title", "artist", "genre", "duration", "url", "artistAvatar"],
           "properties": {
             "title": {
               "type": "string",
@@ -27,6 +27,14 @@
               "type": "string",
               "description": "Nome do artista"
             },
+            "artistAvatar": {
+              "type": "string",
+              "description": "URL do avatar do artista"
+            },
+            "album": {
+              "type": "string",
+              "description": "Nome do álbum"
+            },
             "genre": {
               "type": "string",
               "description": "Gênero da música"
@@ -35,22 +43,56 @@
               "type": "number",
               "description": "Duração da música em segundos"
             },
+            "releaseDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Data de lançamento da música"
+            },
+            "url": {
+              "type": "string",
+              "description": "URL do arquivo de áudio, onde o arquivo pode ser reproduzido"
+            },
+            "cover": {
+              "type": "string",
+              "description": "URL da capa da música ou álbum"
+            },
+            "producer": {
+              "type": "string",
+              "description": "Produtor da música"
+            },
+            "composer": {
+              "type": "string",
+              "description": "Compositor da música"
+            },
+            "category": {
+              "type": "string",
+              "enum": ["Rock", "Pop", "Jazz", "Classical", "Hip-hop", "Electronic", "Other"],
+              "description": "Categoria da música"
+            },
             "playCount": {
               "type": "number",
               "description": "Número de reproduções da música"
             }
           },
           "example": {
-            "title": "Song Title",
-            "artist": "Artist Name",
+            "title": "My Song",
+            "artist": "John Doe",
+            "artistAvatar": "https://example.com/avatar.jpg",
+            "album": "My Album",
             "genre": "Rock",
             "duration": 180,
-            "playCount": 150
+            "releaseDate": "2024-01-01",
+            "url": "https://example.com/audio.mp3",
+            "cover": "https://example.com/cover.jpg",
+            "producer": "Jane Smith",
+            "composer": "John Doe",
+            "category": "Rock",
+            "playCount": 100
           }
         },
         "Album": {
           "type": "object",
-          "required": ["title", "artist", "genre", "trackIds"],
+          "required": ["title", "artist", "genre", "artistAvatar", "trackIds"],
           "properties": {
             "title": {
               "type": "string",
@@ -58,24 +100,40 @@
             },
             "artist": {
               "type": "string",
-              "description": "Nome do artista que criou o álbum"
+              "description": "Nome do artista"
+            },
+            "artistAvatar": {
+              "type": "string",
+              "description": "URL do avatar do artista"
             },
             "genre": {
               "type": "string",
-              "description": "Gênero musical do álbum"
+              "description": "Gênero do álbum"
+            },
+            "releaseDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Data de lançamento do álbum"
+            },
+            "cover": {
+              "type": "string",
+              "description": "URL da capa do álbum"
             },
             "trackIds": {
               "type": "array",
-              "description": "Lista de IDs das músicas no álbum",
               "items": {
                 "type": "string"
-              }
+              },
+              "description": "Lista de IDs das músicas no álbum"
             }
           },
           "example": {
-            "title": "Album Title",
-            "artist": "Artist Name",
-            "genre": "Pop",
+            "title": "My Album",
+            "artist": "John Doe",
+            "artistAvatar": "https://example.com/avatar.jpg",
+            "genre": "Rock",
+            "releaseDate": "2024-01-01",
+            "cover": "https://example.com/cover.jpg",
             "trackIds": ["64b0c34d0f28e3b8b8e87fa9", "64b0c34d0f28e3b8b8e87faa"]
           }
         }
@@ -95,7 +153,8 @@
                   "properties": {
                     "audioFile": {
                       "type": "string",
-                      "format": "binary"
+                      "format": "binary",
+                      "description": "Arquivo de áudio para upload"
                     },
                     "title": {
                       "type": "string",
@@ -112,6 +171,14 @@
                     "duration": {
                       "type": "number",
                       "description": "Duração da música em segundos"
+                    },
+                    "artistAvatar": {
+                      "type": "string",
+                      "description": "URL do avatar do artista"
+                    },
+                    "cover": {
+                      "type": "string",
+                      "description": "URL da capa da música"
                     }
                   }
                 }
@@ -124,7 +191,16 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/Audio"
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string",
+                        "example": "Áudio enviado com sucesso!"
+                      },
+                      "audio": {
+                        "$ref": "#/components/schemas/Audio"
+                      }
+                    }
                   }
                 }
               }
@@ -141,9 +217,17 @@
           "tags": ["Audio"],
           "parameters": [
             {
+                "name": "url",
+                "in": "query",
+                "description": "Filtrar url do audio",
+                "schema": {
+                  "type": "string"
+                }
+              },
+            {
               "name": "artist",
               "in": "query",
-              "description": "Nome do artista",
+              "description": "Filtrar por nome do artista",
               "schema": {
                 "type": "string"
               }
@@ -151,7 +235,7 @@
             {
               "name": "genre",
               "in": "query",
-              "description": "Gênero da música",
+              "description": "Filtrar por gênero",
               "schema": {
                 "type": "string"
               }
@@ -159,7 +243,7 @@
             {
               "name": "album",
               "in": "query",
-              "description": "Nome do álbum",
+              "description": "Filtrar por nome do álbum",
               "schema": {
                 "type": "string"
               }
@@ -167,7 +251,7 @@
             {
               "name": "category",
               "in": "query",
-              "description": "Categoria da música",
+              "description": "Filtrar por categoria",
               "schema": {
                 "type": "string"
               }
@@ -183,7 +267,7 @@
             {
               "name": "limit",
               "in": "query",
-              "description": "Número de itens por página",
+              "description": "Limite de itens por página",
               "schema": {
                 "type": "integer"
               }
@@ -271,6 +355,16 @@
         "get": {
           "summary": "Lista todos os álbuns",
           "tags": ["Album"],
+          "parameters": [
+            {
+              "name": "artist",
+              "in": "query",
+              "description": "Filtrar por nome do artista",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
           "responses": {
             "200": {
               "description": "Lista de álbuns",
@@ -328,7 +422,7 @@
               "description": "Álbum não encontrado"
             },
             "403": {
-              "description": "Acesso negado"
+              "description": "Permissão negada"
             }
           }
         },
@@ -354,7 +448,7 @@
               "description": "Álbum não encontrado"
             },
             "403": {
-              "description": "Acesso negado"
+              "description": "Permissão negada"
             }
           }
         }
