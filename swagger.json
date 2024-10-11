@@ -1,0 +1,364 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Music and Album API",
+      "version": "1.0.0",
+      "description": "API para gerenciar músicas e álbuns",
+      "contact": {
+        "name": "SavanaPoint Dev Team"
+      }
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3000"
+      }
+    ],
+    "components": {
+      "schemas": {
+        "Audio": {
+          "type": "object",
+          "required": ["title", "artist", "genre", "duration"],
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Título da música"
+            },
+            "artist": {
+              "type": "string",
+              "description": "Nome do artista"
+            },
+            "genre": {
+              "type": "string",
+              "description": "Gênero da música"
+            },
+            "duration": {
+              "type": "number",
+              "description": "Duração da música em segundos"
+            },
+            "playCount": {
+              "type": "number",
+              "description": "Número de reproduções da música"
+            }
+          },
+          "example": {
+            "title": "Song Title",
+            "artist": "Artist Name",
+            "genre": "Rock",
+            "duration": 180,
+            "playCount": 150
+          }
+        },
+        "Album": {
+          "type": "object",
+          "required": ["title", "artist", "genre", "trackIds"],
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Título do álbum"
+            },
+            "artist": {
+              "type": "string",
+              "description": "Nome do artista que criou o álbum"
+            },
+            "genre": {
+              "type": "string",
+              "description": "Gênero musical do álbum"
+            },
+            "trackIds": {
+              "type": "array",
+              "description": "Lista de IDs das músicas no álbum",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "example": {
+            "title": "Album Title",
+            "artist": "Artist Name",
+            "genre": "Pop",
+            "trackIds": ["64b0c34d0f28e3b8b8e87fa9", "64b0c34d0f28e3b8b8e87faa"]
+          }
+        }
+      }
+    },
+    "paths": {
+      "/upload": {
+        "post": {
+          "summary": "Faz o upload de uma música",
+          "tags": ["Audio"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "audioFile": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Título da música"
+                    },
+                    "artist": {
+                      "type": "string",
+                      "description": "Nome do artista"
+                    },
+                    "genre": {
+                      "type": "string",
+                      "description": "Gênero da música"
+                    },
+                    "duration": {
+                      "type": "number",
+                      "description": "Duração da música em segundos"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Música enviada com sucesso",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Audio"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Falha no upload"
+            }
+          }
+        }
+      },
+      "/audios": {
+        "get": {
+          "summary": "Lista todas as músicas com paginação e filtros",
+          "tags": ["Audio"],
+          "parameters": [
+            {
+              "name": "artist",
+              "in": "query",
+              "description": "Nome do artista",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "genre",
+              "in": "query",
+              "description": "Gênero da música",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "album",
+              "in": "query",
+              "description": "Nome do álbum",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "category",
+              "in": "query",
+              "description": "Categoria da música",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "description": "Número da página",
+              "schema": {
+                "type": "integer"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "description": "Número de itens por página",
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lista de músicas",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Audio"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/audios/{id}/play": {
+        "post": {
+          "summary": "Incrementa a contagem de reproduções de uma música",
+          "tags": ["Audio"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID da música",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Contagem de reproduções atualizada",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Audio"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Música não encontrada"
+            }
+          }
+        }
+      },
+      "/albums": {
+        "post": {
+          "summary": "Cria um novo álbum",
+          "tags": ["Album"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Album"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Álbum criado com sucesso",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Album"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Erro na criação do álbum"
+            }
+          }
+        },
+        "get": {
+          "summary": "Lista todos os álbuns",
+          "tags": ["Album"],
+          "responses": {
+            "200": {
+              "description": "Lista de álbuns",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Album"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/albums/{id}": {
+        "put": {
+          "summary": "Atualiza um álbum existente",
+          "tags": ["Album"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID do álbum",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Album"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Álbum atualizado com sucesso",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Album"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Álbum não encontrado"
+            },
+            "403": {
+              "description": "Acesso negado"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Exclui um álbum",
+          "tags": ["Album"],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "description": "ID do álbum",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Álbum excluído com sucesso"
+            },
+            "404": {
+              "description": "Álbum não encontrado"
+            },
+            "403": {
+              "description": "Acesso negado"
+            }
+          }
+        }
+      }
+    }
+  }
+  
